@@ -1,9 +1,11 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import {
   getProduct,
+  getProductImages,
   getProductStock,
   getProductsPage,
 } from "@/lib/data/products";
@@ -11,13 +13,16 @@ import { formatPrice } from "@/lib/format";
 
 export async function generateStaticParams() {
   // Cache Components требует ≥1 param, чтобы построить статический shell.
-  const { items } = await getProductsPage({ limit: 20 });
-  if (items.length === 0) {
-    // Пустой каталог на билде: заглушка, чтобы валидация прошла;
-    // страница обработает её через notFound().
+  // Fastify может быть недоступен на сборке (герметичный docker build без API) —
+  // тогда отдаём заглушку: реальные товары отрендерятся on-demand в рантайме
+  // (dynamicParams по умолчанию true). Сама заглушка уходит в notFound().
+  try {
+    const { items } = await getProductsPage({ limit: 20 });
+    if (items.length === 0) return [{ id: "__placeholder__" }];
+    return items.map((p) => ({ id: p.id }));
+  } catch {
     return [{ id: "__placeholder__" }];
   }
-  return items.map((p) => ({ id: p.id }));
 }
 
 // dynamicParams по умолчанию true — товары, добавленные ПОСЛЕ билда, рендерятся
@@ -30,6 +35,9 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
+  // Заглушка не должна дёргать API (иначе герметичная сборка без Fastify падает
+  // на prerender метаданных); сама страница отдаёт для неё notFound().
+  if (id === "__placeholder__") return { title: "Товар" };
   const product = await getProduct(id);
   if (!product) return { title: "Товар не найден" };
 
@@ -67,8 +75,12 @@ export default async function ProductPage({
 }) {
   const { id } = await params;
   if (id === "__placeholder__") notFound();
-  const product = await getProduct(id); // кешировано (профиль product) → в shell
+  const [product, images] = await Promise.all([
+    getProduct(id), // кешировано (профиль product) → в shell
+    getProductImages(id),
+  ]);
   if (!product) notFound();
+  const cover = images[0];
 
   return (
     <article>
@@ -79,7 +91,22 @@ export default async function ProductPage({
         </Link>{" "}
         / {product.title}
       </nav>
-      <h1 className="mt-2 text-3xl font-semibold">{product.title}</h1>
+      {cover && (
+        // Картинку грузит браузер напрямую из storage Fastify, оптимизатор Next
+        // её прогоняет (remotePatterns → localhost:3000/static/**). preload —
+        // проп приоритета в Next 16 (бывший priority): грузим обложку сразу.
+        <Image
+          src={cover.url}
+          alt={product.title}
+          width={cover.width}
+          height={cover.height}
+          quality={75}
+          preload
+          sizes="(max-width: 640px) 100vw, 400px"
+          className="mt-4 h-auto w-full max-w-md rounded-lg border border-zinc-200 object-cover"
+        />
+      )}
+      <h1 className="mt-4 text-3xl font-semibold">{product.title}</h1>
       <p className="mt-2 text-xl">
         {formatPrice(product.priceCents, product.currency)}
       </p>

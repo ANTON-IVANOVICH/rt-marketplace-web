@@ -73,3 +73,25 @@
 - Динамические `sitemap.ts`, `robots.ts`, `manifest.ts` на данных Fastify.
 - `metadataBase` в корневом layout; matcher `proxy` исключает метафайлы; секреты
   `WEBHOOK_SECRET` / `DRAFT_SECRET`.
+
+## 8. Оптимизация и продакшен
+
+- `next/image` для фото товара на карточке товара: `images.remotePatterns` на
+  storage Fastify (`/static/**`), `qualities: [75]`, `dangerouslyAllowLocalIP` для
+  localhost в dev; хелпер `getProductImages`.
+- Ленивая аукционная панель через `next/dynamic` (`ssr: false`) в клиентской
+  обёртке — отдельный чанк, код грузится только на клиенте.
+- React Compiler (`reactCompiler: true`) и `@next/bundle-analyzer`
+  (`ANALYZE=true npm run build`).
+- Сквозная трассировка: `instrumentation.ts` на `@vercel/otel` экспортирует в тот
+  же Jaeger, что и Fastify; `instrumentation-client.ts` — клиентская телеметрия.
+- `global-error.tsx` — перехват ошибок корневого layout.
+- Общий кеш через Redis: `cache-handlers/redis-handler.cjs` под интерфейс
+  `cacheHandlers`, подключается флагом `DOCKER_BUILD`.
+- i18n: словари `ru`/`en` с ленивой подгрузкой и определением локали по
+  `Accept-Language` (`src/lib/i18n.ts`).
+- Тесты: Vitest (`format`, `i18n`) и Playwright (`e2e/`); скрипты `test`,
+  `test:e2e`, `analyze`.
+- Продакшен: `output: 'standalone'` (флаг `DOCKER_BUILD`), `Dockerfile`,
+  `docker-compose.web.yml`, `.dockerignore`; CI GitHub Actions; серверные env
+  `REDIS_URL` / `OTEL_*`.

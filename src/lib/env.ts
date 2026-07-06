@@ -8,6 +8,11 @@ const serverSchema = z.object({
   API_INTERNAL_URL: z.string().url(),
   WEBHOOK_SECRET: z.string().min(1), // HMAC-секрет для вебхуков
   DRAFT_SECRET: z.string().min(1), // секрет входа в Draft Mode
+  // Общий Redis для кеш-хендлера (только мульти-инстанс/docker) — опционально.
+  REDIS_URL: z.string().min(1).optional(),
+  // OTLP-endpoint того же Jaeger, что у Fastify — опционально (читает @vercel/otel).
+  OTEL_EXPORTER_OTLP_ENDPOINT: z.string().url().optional(),
+  OTEL_SERVICE_NAME: z.string().min(1).optional(),
 });
 
 // Клиентские — только с префиксом NEXT_PUBLIC_, Next инлайнит их в бандл.

@@ -1,0 +1,19 @@
+{
+  "nav": {
+    "products": "Products",
+    "catalog": "Catalog",
+    "sell": "Sell",
+    "account": "Account"
+  },
+  "products": {
+    "heading": "Products",
+    "empty": "No products yet",
+    "outOfStock": "Out of stock",
+    "inStock": "In stock"
+  },
+  "auction": {
+    "connecting": "Connecting to the auction…",
+    "bid": "Bid",
+    "ended": "Auction ended."
+  }
+}

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getProduct } from "@/lib/data/products";
-import { AuctionPanel } from "./auction-panel";
+import { AuctionPanelLoader } from "./auction-panel-loader";
 import { LiveTicker } from "./live-ticker";
 
 export async function generateStaticParams() {
@@ -24,7 +24,7 @@ export default async function AuctionPage({
         <p className="mt-2 text-zinc-600">{product.description}</p>
       )}
       <div className="mt-6">
-        <AuctionPanel productId={id} currency={product.currency} />
+        <AuctionPanelLoader productId={id} currency={product.currency} />
       </div>
       <LiveTicker />
     </main>

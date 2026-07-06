@@ -1,0 +1,30 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # schema.d.ts закоммичен, поэтому gen:api (нужен живой Fastify) в CI не запускаем.
+    # Env — заглушки: сборка вычисляет серверную/клиентскую схему env при загрузке
+    # модулей, поэтому обязательные переменные должны присутствовать.
+    env:
+      API_INTERNAL_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_URL: http://localhost:3001
+      NEXT_PUBLIC_WS_URL: ws://localhost:3000
+      WEBHOOK_SECRET: ci-secret
+      DRAFT_SECRET: ci-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+  # E2E (Playwright) — отдельной job с поднятыми Fastify+Postgres+Redis через
+  # services/compose и E2E_BASE_URL на запущенный Next. Требует образа Fastify,
+  # поэтому здесь не разворачиваем.

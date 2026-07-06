@@ -1,0 +1,33 @@
+# Фрагмент для встраивания в СУЩЕСТВУЮЩИЙ docker-compose Fastify (api/postgres/
+# redis/jaeger). Добавьте сервис `web` в тот же compose — тогда Next, Fastify,
+# Postgres, Redis и Jaeger живут в одной сети: общий Redis-кеш и один сквозной
+# трейс. Путь build указывает на этот репозиторий относительно compose-файла.
+#
+# Суть интеграции — разделение internal/external адресов:
+#   API_INTERNAL_URL — имя сервиса `api` (серверный код Next внутри сети compose),
+#   NEXT_PUBLIC_*     — `localhost` (браузер достаёт Fastify через опубликованный порт).
+services:
+  web:
+    build:
+      context: ../rt-marketplace-web
+      # NEXT_PUBLIC_* инлайнятся в клиентский бандл на СБОРКЕ — рантайм-env их уже
+      # не меняет, поэтому реальные публичные значения передаём как build args.
+      args:
+        NEXT_PUBLIC_APP_URL: http://localhost:3001
+        NEXT_PUBLIC_WS_URL: ws://localhost:3000
+    ports:
+      - "3001:3001"
+    environment:
+      API_INTERNAL_URL: http://api:3000 # сервер→сервер: имя сервиса в сети compose
+      # NEXT_PUBLIC_* дублируем и в рантайме — их читает серверный код (SSR) при старте.
+      NEXT_PUBLIC_APP_URL: http://localhost:3001
+      NEXT_PUBLIC_WS_URL: ws://localhost:3000 # браузер → Fastify напрямую (WS)
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-change-me}
+      DRAFT_SECRET: ${DRAFT_SECRET:-change-me}
+      REDIS_URL: redis://redis:6379 # ТОТ ЖЕ Redis, что у Fastify → общий кеш
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318 # ТОТ ЖЕ Jaeger → сквозной трейс
+      OTEL_SERVICE_NAME: marketplace-web
+    depends_on:
+      - api
+      - redis
+      - jaeger
