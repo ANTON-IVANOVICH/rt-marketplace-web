@@ -91,7 +91,10 @@ export async function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Исключаем статику, иначе proxy гоняется на каждый ассет.
+// Исключаем статику и метафайлы (sitemap/robots/manifest кешируются по умолчанию),
+// иначе proxy гоняется на каждый ассет и метафайл.
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest).*)",
+  ],
 };

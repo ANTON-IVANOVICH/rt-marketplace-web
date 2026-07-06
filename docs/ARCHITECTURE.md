@@ -168,3 +168,27 @@ Next-процесса. Единственный источник правды п
   стабильном React 19.2 (только в `react@experimental`, иначе рантайм-краш), как и
   taint из раздела 4. `Activity` в React 19.2 доступен, но демо-обёртка не
   подключалась.
+
+## 7. Route Handlers и BFF-слой
+
+- **Развилка инструментов:** Server Action — мутации изнутри Next; Route Handler —
+  HTTP-эндпоинт для ВНЕШНИХ потребителей (вебхуки, мобильные, публичный JSON) и
+  стриминга; прямой fetch в Server Component — чтение для рендера.
+- **GET-хендлеры под Cache Components:** динамический handler (читает `request.url`
+  или cookie) ≠ некешированные данные — данные берутся из `'use cache'`-хелпера
+  (`getProductsPage`). Грабля: `'use cache'` нельзя в теле handler'а, только в
+  хелпере.
+- **BFF-агрегация** `/api/mobile/products/[id]`: товар + ставки параллельно
+  (`Promise.all`), форвардинг Bearer из cookie; `OPTIONS` — CORS-префлайт.
+- **Вебхуки:** публичный POST с HMAC-подписью (`timingSafeEqual` + сверка длины);
+  `revalidateTag` (2 арг), НЕ `updateTag` (тот только из Server Action); `after()`
+  выполняет тяжёлую работу после ответа клиенту.
+- **Draft Mode:** асинхронный `draftMode()`; при включении все `'use cache'`
+  пере-выполняются мимо кеша (предпросмотр свежих данных). Вход по секрету, цель
+  redirect санитизируется до внутренних путей (иначе open redirect).
+- **OG-картинки:** `next/og` `ImageResponse` (Satori → PNG без headless-браузера),
+  `generateStaticParams` под Cache Components. **`metadataBase`** в корневом layout
+  обязателен — без него абсолютные `og:image` резолвятся на дефолтный
+  `localhost:3000` (это Fastify), а не на Next-приложение.
+- **Метафайлы** `sitemap.ts` / `robots.ts` / `manifest.ts` на данных Fastify
+  кешируются по умолчанию — поэтому исключены из matcher `proxy.ts`.

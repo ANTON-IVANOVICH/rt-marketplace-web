@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { clientConfig } from "@/lib/env";
 import "./globals.css";
 
 const inter = Inter({
@@ -9,6 +10,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  // Абсолютные URL (og:image и т.п.) резолвятся против этого адреса Next-приложения.
+  // Без него Next по умолчанию берёт http://localhost:3000 — это Fastify, не мы.
+  metadataBase: new URL(clientConfig.NEXT_PUBLIC_APP_URL),
   title: { default: "Marketplace", template: "%s · Marketplace" },
   description: "Next.js 16 фронтенд поверх Fastify API",
 };

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { draftMode } from "next/headers";
 import { getProductsPage } from "@/lib/data/products";
 import { ProductCard } from "./_components/product-card";
 import { PageSizeSelect } from "./_components/page-size-select";
@@ -10,6 +11,7 @@ export default async function ProductsPage({
   searchParams: Promise<{ cursor?: string; limit?: string; q?: string }>;
 }) {
   const { cursor, limit, q } = await searchParams;
+  const { isEnabled: draft } = await draftMode();
   const parsedLimit = Math.min(Math.max(Number(limit) || 20, 1), 100);
 
   const { items, nextCursor } = await getProductsPage({
@@ -25,6 +27,14 @@ export default async function ProductsPage({
 
   return (
     <div>
+      {draft && (
+        <div className="mb-4 rounded bg-amber-100 px-3 py-2 text-sm text-amber-800">
+          Режим предпросмотра — данные свежие, кеш в обход.{" "}
+          <a href="/api/draft/disable" className="underline">
+            Выйти
+          </a>
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Товары</h1>
         <PageSizeSelect />

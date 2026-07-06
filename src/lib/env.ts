@@ -6,6 +6,8 @@ const serverSchema = z.object({
     .enum(["development", "production", "test"])
     .default("development"),
   API_INTERNAL_URL: z.string().url(),
+  WEBHOOK_SECRET: z.string().min(1), // HMAC-секрет для вебхуков
+  DRAFT_SECRET: z.string().min(1), // секрет входа в Draft Mode
 });
 
 // Клиентские — только с префиксом NEXT_PUBLIC_, Next инлайнит их в бандл.

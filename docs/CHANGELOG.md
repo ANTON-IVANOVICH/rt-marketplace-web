@@ -60,3 +60,16 @@
 - Parallel route: слот `@modal` (+ `default.tsx`) и intercepting route
   `(.)products/[id]` — модалка карточки товара поверх списка.
 - SSE: стриминговый Route Handler `/api/stream` и клиент `LiveTicker`.
+
+## 7. Route Handlers и BFF-слой
+
+- Кешируемый GET-эндпоинт `/api/products` (данные через `'use cache'`-хелпер).
+- BFF-агрегация `/api/mobile/products/[id]` — товар и ставки одним ответом,
+  CORS-префлайт `OPTIONS`.
+- Вебхук `/api/webhooks/revalidate` — HMAC-подпись, `after()`, `revalidateTag`.
+- Draft Mode: `/api/draft` (вход по секрету) и `/api/draft/disable`; баннер
+  предпросмотра на `/products`.
+- OG-картинки `products/[id]/opengraph-image` через `next/og` (Satori → PNG).
+- Динамические `sitemap.ts`, `robots.ts`, `manifest.ts` на данных Fastify.
+- `metadataBase` в корневом layout; matcher `proxy` исключает метафайлы; секреты
+  `WEBHOOK_SECRET` / `DRAFT_SECRET`.
