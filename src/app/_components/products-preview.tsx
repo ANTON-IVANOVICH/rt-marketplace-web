@@ -1,11 +1,12 @@
-import { api, unwrap, ApiError } from "@/lib/api/client";
+import { apiPublic } from "@/lib/api/public-client";
+import { unwrap, ApiError } from "@/lib/api/http";
 
 export async function ProductsPreview() {
   let titles: string[] = [];
 
   try {
     const data = await unwrap(
-      api.GET("/api/v1/products/", { params: { query: { limit: 5 } } }),
+      apiPublic.GET("/api/v1/products/", { params: { query: { limit: 5 } } }),
     );
     titles = data.items.map((p) => p.title);
   } catch (err) {

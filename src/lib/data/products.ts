@@ -1,5 +1,6 @@
 import { cacheLife, cacheTag } from "next/cache";
-import { api, ApiError, unwrap } from "@/lib/api/client";
+import { apiPublic } from "@/lib/api/public-client";
+import { ApiError, unwrap } from "@/lib/api/http";
 import type { Product, ProductList } from "@/lib/api/types";
 
 // === Function-level: одиночный товар ===
@@ -8,7 +9,7 @@ export async function getProduct(id: string): Promise<Product | null> {
   cacheLife("product"); // кастомный профиль из next.config
   cacheTag("products", `product-${id}`); // широкий + точечный тег
 
-  const { data, error, response } = await api.GET("/api/v1/products/{id}/", {
+  const { data, error, response } = await apiPublic.GET("/api/v1/products/{id}/", {
     params: { path: { id } },
   });
   // 404 (нет товара) и 400 (кривой uuid) → null: страница уйдёт в notFound().
@@ -35,7 +36,7 @@ export async function getProductsPage(query: {
 
   // list-эндпоинт объявляет только 200 → openapi-fetch схлопывает ветку error,
   // а response типизируется как never; unwrap разбирает ошибки за нас.
-  return unwrap(api.GET("/api/v1/products/", { params: { query } }));
+  return unwrap(apiPublic.GET("/api/v1/products/", { params: { query } }));
 }
 
 // === Живой остаток — намеренно короткий профиль (динамическая дыра) ===
@@ -47,7 +48,7 @@ export async function getProductStock(id: string): Promise<number | null> {
   cacheLife("seconds"); // → динамическая дыра, ОБЯЗАН быть в <Suspense>
   cacheTag(`product-${id}-stock`);
 
-  const { data } = await api.GET("/api/v1/products/{id}/", {
+  const { data } = await apiPublic.GET("/api/v1/products/{id}/", {
     params: { path: { id } },
   });
   return data?.stock ?? null;

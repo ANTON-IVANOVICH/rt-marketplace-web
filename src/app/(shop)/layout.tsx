@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import type { Route } from "next";
+import { UserNav } from "./_components/user-nav";
 
 export default function ShopLayout({
   children,
@@ -21,6 +23,13 @@ export default function ShopLayout({
             Каталог
           </Link>
         </nav>
+        {/* Динамическая дыра: имя пользователя читает cookie и стримится,
+            остальная шапка — статический shell. */}
+        <div className="ml-auto">
+          <Suspense fallback={null}>
+            <UserNav />
+          </Suspense>
+        </div>
       </header>
       {children}
     </div>
