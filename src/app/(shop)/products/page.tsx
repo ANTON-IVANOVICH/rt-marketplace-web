@@ -2,19 +2,26 @@ import Link from "next/link";
 import { getProductsPage } from "@/lib/data/products";
 import { ProductCard } from "./_components/product-card";
 import { PageSizeSelect } from "./_components/page-size-select";
+import { ProductSearch } from "./_components/product-search";
 
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ cursor?: string; limit?: string }>;
+  searchParams: Promise<{ cursor?: string; limit?: string; q?: string }>;
 }) {
-  const { cursor, limit } = await searchParams;
+  const { cursor, limit, q } = await searchParams;
   const parsedLimit = Math.min(Math.max(Number(limit) || 20, 1), 100);
 
   const { items, nextCursor } = await getProductsPage({
     limit: parsedLimit,
     cursor,
   });
+
+  // Fastify не выставляет поисковый эндпоинт → фильтруем уже загруженную страницу
+  // по названию (в Fastify есть GIN-индекс pg_trgm под будущий /products/search).
+  const visible = q
+    ? items.filter((p) => p.title.toLowerCase().includes(q.toLowerCase()))
+    : items;
 
   return (
     <div>
@@ -23,11 +30,15 @@ export default async function ProductsPage({
         <PageSizeSelect />
       </div>
 
-      {items.length === 0 ? (
+      <div className="mt-4">
+        <ProductSearch defaultQuery={q} />
+      </div>
+
+      {visible.length === 0 ? (
         <p className="mt-6 text-zinc-500">Ничего не найдено.</p>
       ) : (
         <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((p) => (
+          {visible.map((p) => (
             <li key={p.id}>
               <ProductCard product={p} />
             </li>
@@ -35,7 +46,7 @@ export default async function ProductsPage({
         </ul>
       )}
 
-      {nextCursor && (
+      {!q && nextCursor && (
         <div className="mt-8">
           <Link
             href={`/products?limit=${parsedLimit}&cursor=${encodeURIComponent(nextCursor)}`}

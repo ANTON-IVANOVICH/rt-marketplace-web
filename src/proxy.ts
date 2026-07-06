@@ -7,7 +7,10 @@ import {
 } from "@/lib/auth/cookies";
 import { serverEnv } from "@/lib/env";
 
-const PROTECTED = ["/account", "/sell"];
+// Оптимистичный список статических префиксов. /products/[id]/manage сюда не
+// вписать простым префиксом (лежит под публичным /products) — его закрывает
+// AuthGate в (protected)/layout.tsx (настоящая проверка).
+const PROTECTED = ["/account", "/sell", "/manage"];
 
 // Оптимистичная проверка истечения — БЕЗ верификации подписи (её делает Fastify).
 // proxy.ts на Node.js-рантайме → декодируем payload нативным Buffer, без edge-лимитов.

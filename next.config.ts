@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
     // Карточка товара: относительно стабильна.
     product: { stale: 300, revalidate: 900, expire: 3600 },
   },
+  experimental: {
+    // 15 МБ картинки для Fastify + overhead multipart-границ. Лимит бьёт по
+    // сырому телу, поэтому берём с запасом.
+    serverActions: { bodySizeLimit: "16mb" },
+  },
   // reactCompiler: true, // опционально: стабилен в 16, авто-мемоизация. Включим на этапе 8.
 };
 
