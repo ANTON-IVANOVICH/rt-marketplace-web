@@ -39,4 +39,4 @@ yarn-error.log*
 next-env.d.ts
 
 # course spec (private notes, not part of the app)
-story.md
+docs/story.md
