@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { listProducts } from "@/lib/data/products";
+import { getProductsPage } from "@/lib/data/products";
 import { ProductCard } from "./_components/product-card";
 import { PageSizeSelect } from "./_components/page-size-select";
 
@@ -11,7 +11,7 @@ export default async function ProductsPage({
   const { cursor, limit } = await searchParams;
   const parsedLimit = Math.min(Math.max(Number(limit) || 20, 1), 100);
 
-  const { items, nextCursor } = await listProducts({
+  const { items, nextCursor } = await getProductsPage({
     limit: parsedLimit,
     cursor,
   });

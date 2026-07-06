@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Route } from "next";
-import { listProducts } from "@/lib/data/products";
+import { getProductsPage } from "@/lib/data/products";
 
 export default async function CatalogPage({
   params,
@@ -8,7 +8,7 @@ export default async function CatalogPage({
   params: Promise<{ filters?: string[] }>;
 }) {
   const { filters = [] } = await params;
-  const { items } = await listProducts({ limit: 20 });
+  const { items } = await getProductsPage({ limit: 20 });
 
   return (
     <div>
