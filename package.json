@@ -9,7 +9,7 @@
     "start": "next start --port 3001",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "gen:api": "openapi-typescript http://localhost:3000/docs/json -o src/lib/api/schema.d.ts"
+    "gen:api": "node scripts/gen-api.mjs"
   },
   "dependencies": {
     "next": "^16.2.0",

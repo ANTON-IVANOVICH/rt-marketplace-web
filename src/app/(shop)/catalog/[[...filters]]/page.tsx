@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Route } from "next";
 import { listProducts } from "@/lib/data/products";
 
 export default async function CatalogPage({
@@ -12,7 +13,7 @@ export default async function CatalogPage({
   return (
     <div>
       <nav className="text-sm text-zinc-500">
-        <Link href="/catalog" className="hover:underline">
+        <Link href={"/catalog" as Route} className="hover:underline">
           Каталог
         </Link>
         {filters.map((seg, i) => (

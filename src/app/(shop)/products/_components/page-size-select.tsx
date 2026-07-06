@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 const SIZES = [10, 20, 50];
@@ -14,7 +15,9 @@ export function PageSizeSelect() {
     const params = new URLSearchParams(searchParams.toString());
     params.set("limit", e.target.value);
     params.delete("cursor"); // сброс пагинации при смене размера страницы
-    router.push(`${pathname}?${params.toString()}`);
+    // pathname из usePathname() — просто string, поэтому typedRoutes не выводит
+    // конкретный маршрут: помечаем цель явно как Route.
+    router.push(`${pathname}?${params.toString()}` as Route);
   }
 
   return (

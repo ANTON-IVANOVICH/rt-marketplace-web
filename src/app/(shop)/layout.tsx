@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Route } from "next";
 
 export default function ShopLayout({
   children,
@@ -15,7 +16,8 @@ export default function ShopLayout({
           <Link href="/products" className="hover:text-zinc-900">
             Товары
           </Link>
-          <Link href="/catalog" className="hover:text-zinc-900">
+          {/* Опциональный catch-all: базовый /catalog не попадает в union typedRoutes → as Route. */}
+          <Link href={"/catalog" as Route} className="hover:text-zinc-900">
             Каталог
           </Link>
         </nav>
