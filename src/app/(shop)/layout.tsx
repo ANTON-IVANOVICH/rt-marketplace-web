@@ -5,8 +5,10 @@ import { UserNav } from "./_components/user-nav";
 
 export default function ShopLayout({
   children,
+  modal,
 }: {
   children: React.ReactNode;
+  modal: React.ReactNode; // слот @modal приходит как проп (parallel route)
 }) {
   return (
     <div className="mx-auto max-w-5xl px-6 py-8">
@@ -32,6 +34,7 @@ export default function ShopLayout({
         </div>
       </header>
       {children}
+      {modal} {/* слот @modal: перехваченная модалка рядом с основным контентом */}
     </div>
   );
 }

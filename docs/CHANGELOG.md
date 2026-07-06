@@ -51,3 +51,12 @@
 - Оптимистичное удаление `/manage` (`useOptimistic`).
 - Загрузка изображений `/products/[id]/manage` (форвардинг multipart в Fastify).
 - `experimental.serverActions.bodySizeLimit`; `proxy` защищает `/manage`.
+
+## 6. Реалтайм и продвинутый роутинг
+
+- WS-аукционы: хук `use-auction-socket` (авто-реконнект, схематизированные
+  события), панель ставок с ручной оптимистикой, страница `/auctions/[id]`.
+- Auth для WS через тикет-Server Action `getAuctionTicket`; `NEXT_PUBLIC_WS_URL`.
+- Parallel route: слот `@modal` (+ `default.tsx`) и intercepting route
+  `(.)products/[id]` — модалка карточки товара поверх списка.
+- SSE: стриминговый Route Handler `/api/stream` и клиент `LiveTicker`.

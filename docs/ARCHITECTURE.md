@@ -141,3 +141,30 @@ Next-процесса. Единственный источник правды п
 - **Route groups не конфликтуют по путям.** `(shop)/products/[id]` (публичная
   карточка) и `(protected)/products/[id]/manage` (загрузка картинок под AuthGate)
   сосуществуют — пути разные, а защита у второго от layout'а группы `(protected)`.
+
+## 6. Реалтайм и продвинутый роутинг
+
+- **WebSocket — единственное прямое общение браузера с Fastify.** Auth решается
+  тикетом: Server Action `getAuctionTicket` читает access-токен из httpOnly-cookie
+  и отдаёт клиенту для handshake (Fastify ждёт JWT в query). Это единственное
+  место, где токен попадает в JS клиента: короткоживущий, только для handshake,
+  при обрыве берётся свежий. Аукционы в Fastify ключуются по `productId`.
+- **Хук сокета** с авто-реконнектом, cleanup при unmount и разбором событий
+  `auction:state` / `bid:placed` / `bid:rejected` / `auction:ended` (контракт
+  сверен пробой реального WS). Реконнект вызывает `connect` через ref — иначе
+  `useCallback` ссылался бы на себя (ошибка react-hooks).
+- **Ручная оптимистика ставок** (`useState`), а не `useOptimistic`: ставка идёт по
+  WebSocket, а не через Server Action. Реконсиляция вручную: `bid:placed`
+  подтверждает и снимает оптимизм, `bid:rejected` откатывает.
+- **Parallel routes**: слот `@modal` в layout'е `(shop)` + обязательный
+  `default.tsx` (→ null) для неперехваченных маршрутов. **Intercepting route**
+  `(.)products/[id]`: soft-навигация из списка → модалка в слоте поверх списка;
+  прямой URL или refresh → полная страница. Deep-linkable: URL всегда
+  `/products/[id]`.
+- **SSE через стриминговый Route Handler** `/api/stream` (`ReadableStream`,
+  `text/event-stream`, cleanup по `request.signal`) — односторонний поток как
+  альтернатива WS; клиент через `EventSource`. Route помечается динамическим (ƒ).
+- **Отступления:** `<ViewTransition>` не используется — компонент отсутствует в
+  стабильном React 19.2 (только в `react@experimental`, иначе рантайм-краш), как и
+  taint из раздела 4. `Activity` в React 19.2 доступен, но демо-обёртка не
+  подключалась.
